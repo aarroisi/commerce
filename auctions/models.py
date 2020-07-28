@@ -11,7 +11,7 @@ class Listing(models.Model):
     bid = models.PositiveIntegerField()
     image = models.CharField(max_length=1000, blank=True)
     category = models.CharField(max_length=30, blank=True)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="own_listings")
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="all_listings")
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
