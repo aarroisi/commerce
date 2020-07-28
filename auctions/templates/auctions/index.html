@@ -1,7 +1,35 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
-
-    TODO
+    <div class="container">
+        <h2>Active Listings</h2>
+        <table class="table" style="text-align: center;">
+            <thead>
+                <tr>
+                    <th scope="col">Image</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Bid</th>
+                    <th scope="col">Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for listing in listings %}
+                    <td><img src="{{listing.image}}"></td>
+                    <td>{{listing.title}}</td>
+                    <td>{{listing.desc}}</td>
+                    <td>{{listing.bid}}</td>
+                    <td>{{listing.category}}</td>
+                    {% empty %}
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
