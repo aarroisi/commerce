@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 from .models import User, Listing
 
@@ -63,6 +64,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+@login_required
 def create_listing(request):
     if request.method == "GET":
         return render(request, "auctions/create_listing.html")
@@ -72,13 +74,15 @@ def create_listing(request):
         bid = request.POST["inputBid"]
         imageurl = request.POST["inputImageurl"]
         category = request.POST["inputCategory"]
+        creator = request.user
         try:
             newListing = Listing(
                 title = title,
                 desc = desc,
                 bid = bid,
                 image = imageurl,
-                category = category
+                category = category,
+                creator = creator
             )
             newListing.save()
         except:
