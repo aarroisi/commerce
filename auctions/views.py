@@ -9,8 +9,10 @@ from .models import User, Listing
 
 
 def index(request):
+    listings = Listing.objects.all()
+    listings = Listing.objects.order_by('-created_at')
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all(),
+        "listings": listings,
     })
 
 def login_view(request):
@@ -64,7 +66,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-@login_required
+@login_required(login_url='/login/')
 def create_listing(request):
     if request.method == "GET":
         return render(request, "auctions/create_listing.html")
@@ -74,7 +76,7 @@ def create_listing(request):
         bid = request.POST["inputBid"]
         imageurl = request.POST["inputImageurl"]
         category = request.POST["inputCategory"]
-        creator = request.user
+        creator = request.user.username
         try:
             newListing = Listing(
                 title = title,
@@ -90,3 +92,9 @@ def create_listing(request):
                 "message": "There is some error."
             })
         return HttpResponseRedirect(reverse("create_listing"))
+
+def listing(request, list_):
+    if request.method == "GET":
+        return render(request, "auctions/listing.html", {
+            "list": Listing.objects.filter(id=list_, active=True)[0]
+        })

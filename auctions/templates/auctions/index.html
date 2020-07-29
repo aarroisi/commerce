@@ -3,9 +3,10 @@
 {% block body %}
     <div class="container">
         <h2>Active Listings</h2>
-        <table class="table" style="text-align: center;">
-            <thead>
-                <tr>
+        <table class="table table-bordered" style="text-align: center;">
+            <thead class="thead-dark">
+                <tr class="align-middle">
+                    <th scope="col">Created Date</th>
                     <th scope="col">Image</th>
                     <th scope="col">Title</th>
                     <th scope="col">Description</th>
@@ -14,21 +15,29 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    {% for listing in listings %}
-                    <td><img src="{{listing.image}}"></td>
-                    <td>{{listing.title}}</td>
-                    <td>{{listing.desc}}</td>
-                    <td>{{listing.bid}}</td>
-                    <td>{{listing.category}}</td>
-                    {% empty %}
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    {% endfor %}
-                </tr>
+                {% for listing in listings %}
+                    {% if listing.active %}
+                        <tr>
+                            {% load tz %}
+                            <td>{{listing.created_at|localtime}}</td>
+                            <td><img src="{{listing.image}}"></td>
+                            <td><a href="{% url 'listing' listing.id %}">{{listing.title}}</a></td>
+                            <td>{{listing.desc}}</td>
+                            <td>{{listing.bid}}</td>
+                            <td>{{listing.category}}</td>
+                        </tr>
+                    {% else %}
+                    {% endif %}
+                {% empty %}
+                    <tr>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
