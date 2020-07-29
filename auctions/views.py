@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import User, Listing, Watchlist, Bid
+from django.utils import timezone
+
 
 def index(request):
     listings = Listing.objects.filter(active=True)
@@ -94,7 +96,7 @@ def create_listing(request):
         messages.success(request, 'New listing is added.')
         return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": newListing.id}))
 
-def allWL(request, listing_id, active=True):
+def allWL(request, listing_id, active=True, active2=True):
     if not request.user.is_authenticated:
         return []
     else:
@@ -105,6 +107,7 @@ def allWL(request, listing_id, active=True):
         wls = Watchlist.objects.filter(
             creator = request.user,
             listing = lists,
+            active = active2,
         )
         return wls
 
@@ -123,13 +126,17 @@ def listing(request, listing_id):
 def addwl(request):
     if request.method == "POST":
         listing_id = request.POST["listing_id"]
-        wls = allWL(request, listing_id)
+        wls = allWL(request, listing_id, active2=False)
         if len(wls) == 0:
             newWL = Watchlist(
                 creator = request.user,
                 listing = Listing.objects.filter(id=listing_id, active=True)[0],
             )
             newWL.save()
+        elif len([i for i in wls if i.active == False]) > 0:
+            exsWL = wls[0]
+            exsWL.active = True
+            exsWL.save()
         else:
             messages.warning(request, 'Already in the wathchlist.')
             return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
@@ -142,16 +149,17 @@ def addwl(request):
 def rmwl(request):
     if request.method == "POST":
         listing_id = request.POST["listing_id"]
-        wls = allWL(request, listing_id)
-        wls.delete()
-        messages.error(request, 'Removed from the watchlist.')
+        wls = allWL(request, listing_id)[0]
+        wls.active = False
+        wls.save()
+        messages.warning(request, 'Removed from the watchlist.')
         return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
     else:
         return HttpResponseRedirect(reverse("index"))
 
 @login_required(login_url='/login/')
 def watchlist(request):
-    wls = Watchlist.objects.filter(creator=request.user)
+    wls = Watchlist.objects.filter(creator=request.user, active=True)
     wls_id = [i.listing.id for i in wls]
     listings = Listing.objects.filter(pk__in=wls_id)
     return render(request, "auctions/watchlist.html", {

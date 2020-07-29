@@ -3,49 +3,52 @@
 {% block body %}
     <div class="container">
         <h2>Active Listings</h2>
-        <table class="table table-bordered" style="text-align: center;">
-            <thead class="thead-dark">
-                <tr class="align-middle">
-                    <th scope="col" style="min-width:100px">Created Date</th>
-                    <th scope="col" style="min-width:100px">Image</th>
-                    <th scope="col" style="min-width:100px">Title</th>
-                    <th scope="col" style="min-width:160px">Description</th>
-                    <th scope="col" style="min-width:100px">Current Bid (USD)</th>
-                    <th scope="col" style="min-width:80px">Category</th>
-                    <th scope="col" style="min-width:80px">Creator</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for listing in listings %}
-                    {% if listing.active %}
-                        <tr>
-                            <td>{{listing.created_at}}</td>
-                            <td><img class="img_index" src="{{listing.image}}"></td>
-                            <td><a href="{% url 'listing' listing.id %}">{{listing.title}}</a></td>
-                            <td>{{listing.desc}}</td>
-                            <td>{{listing.current_bid}}</td>
-                            {% if listing.category%}
-                                <td><a href="{% url 'category' listing.category %}">{{listing.category}}</a></td>
-                            {% else %}
-                                <td>{{listing.category}}</td>
-                            {% endif %}
-                            <td>{{listing.creator.username}}</td>
-                        </tr>
-                    {% else %}
-                    {% endif %}
-                {% empty %}
-                    <tr>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
+        <div class="scrollable">
+            <table class="table table-bordered" style="text-align: center;">
+                <thead class="thead-dark">
+                    <tr class="align-middle">
+                        <th scope="col" style="min-width:100px">Created Date</th>
+                        <th scope="col" style="min-width:100px">Image</th>
+                        <th scope="col" style="min-width:100px">Title</th>
+                        <th scope="col" style="min-width:160px">Description</th>
+                        <th scope="col" style="min-width:100px">Current Bid (USD)</th>
+                        <th scope="col" style="min-width:80px">Category</th>
+                        <th scope="col" style="min-width:80px">Creator</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for listing in listings %}
+                        {% if listing.active %}
+                            <tr>
+                                <td>{{ listing.created_at }}</td>
+                                <td><img class="img_index" src="{{listing.image}}"></td>
+                                <td><a href="{% url 'listing' listing.id %}">{{listing.title}}</a></td>
+                                <td>{{listing.desc}}</td>
+                                {% load humanize %}
+                                <td>{{listing.current_bid|floatformat:2|intcomma}}</td>
+                                {% if listing.category%}
+                                    <td><a href="{% url 'category' listing.category %}">{{listing.category}}</a></td>
+                                {% else %}
+                                    <td>{{listing.category}}</td>
+                                {% endif %}
+                                <td>{{listing.creator.username}}</td>
+                            </tr>
+                        {% else %}
+                        {% endif %}
+                    {% empty %}
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     
 {% endblock %}
