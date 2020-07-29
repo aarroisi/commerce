@@ -88,10 +88,11 @@ def create_listing(request):
             )
             newListing.save()
         except:
-            return render(request, "auctions/create_listing.html", {
-                "message": "Some required fields are not filled."
-            })
-        return HttpResponseRedirect(reverse("create_listing"))
+            messages.error(request, 'Some required fields are not filled.')
+            return HttpResponseRedirect(reverse("create_listing"))
+        
+        messages.success(request, 'New listing is added.')
+        return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": newListing.id}))
 
 def allWL(request, listing_id, active=True):
     if not request.user.is_authenticated:
@@ -235,6 +236,7 @@ def won(request):
 def categories(request):
     listings = Listing.objects.filter(active=True)
     catgs = [i.category for i in listings if i.category != ""]
+    catgs = list(set(catgs))
     return render(request, "auctions/categories.html", {
         "catgs": catgs,
     })
@@ -244,4 +246,10 @@ def category(request, catg):
     return render(request, "auctions/category.html", {
         "listings": listings,
         "catg": catg,
+    })
+
+def my_listings(request):
+    listings = Listing.objects.filter(creator=request.user)
+    return render(request, "auctions/my_listings.html", {
+        "listings": listings,
     })

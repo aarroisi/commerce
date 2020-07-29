@@ -1,0 +1,60 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        <h2>My Listings</h2>
+        <table class="table table-bordered" style="text-align: center;">
+            <thead class="thead-dark">
+                <tr class="align-middle">
+                    <th scope="col" style="min-width:100px">Created Date</th>
+                    <th scope="col" style="min-width:100px">Image</th>
+                    <th scope="col" style="min-width:100px">Title</th>
+                    <th scope="col" style="min-width:160px">Description</th>
+                    <th scope="col" style="min-width:100px">Final Price / Current Bid (USD)</th>
+                    <th scope="col" style="min-width:80px">Winner / Highest Bidder</th>
+                    <th scope="col" style="min-width:80px">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for listing in listings %}
+                    <tr>
+                        <td>{{listing.created_at}}</td>
+                        <td><img class="img_index" src="{{listing.image}}"></td>
+                        <td><a href="{% url 'listing' listing.id %}">{{listing.title}}</a></td>
+                        <td>{{listing.desc}}</td>
+                        <td>{{listing.current_bid}}</td>
+                        <td>
+                            {% if listing.last_bidder %}
+                                {{listing.last_bidder}}
+                            {% else %}
+                                {% if listing.active %}
+                                    No bidder
+                                {% else %}
+                                    No winner
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if listing.active %}
+                                <p class="text-success">Open</p>
+                            {% else %}
+                                <p class="text-danger">Closed</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+{% endblock %}

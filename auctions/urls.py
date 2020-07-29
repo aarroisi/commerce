@@ -16,6 +16,7 @@ urlpatterns = [
     path("close/", views.close, name="close"),
     path("won/", views.won, name="won"),
     path("categories/", views.categories, name="categories"),
-    path("categories/<str:catg>/", views.category, name="category")
+    path("categories/<str:catg>/", views.category, name="category"),
+    path("my_listings/", views.my_listings, name="my_listings"),
 ]
 
