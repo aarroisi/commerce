@@ -10,7 +10,7 @@ from .models import User, Listing
 
 def index(request):
     listings = Listing.objects.all()
-    listings = Listing.objects.order_by('-created_at')
+    listings = sorted(listings, key=lambda i: i.created_at, reverse=True)
     return render(request, "auctions/index.html", {
         "listings": listings,
     })
@@ -89,7 +89,7 @@ def create_listing(request):
             newListing.save()
         except:
             return render(request, "auctions/create_listing.html", {
-                "message": "There is some error."
+                "message": "Some required fields are not filled."
             })
         return HttpResponseRedirect(reverse("create_listing"))
 
