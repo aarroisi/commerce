@@ -2,7 +2,11 @@
 
 {% block body %}
     <div class="container">
-
+        {% if not listing.active and listing.creator != user %}
+            <div class="alert alert-success" role="alert">
+                You won this listing. Congratulations.
+            </div>
+        {% endif %}
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }}" role="alert">
@@ -53,9 +57,18 @@
                 <div>
                     <p class="text-danger top_info">Status: Closed</p>
                 </div>
-                <div>
-                    <p class="text-success top_info">Winner: {{listing.last_bidder}}</p>
-                </div>
+                {% if user.is_authenticated %}
+                    {% if user == listing.creator %}
+                        <div>
+                            {% if listing.last_bidder %}
+                                <p class="text-success top_info">Winner: {{listing.last_bidder}}</p>
+                            {% else %}
+                                <p class="text-warning top_info">No winner</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endif %}
+               
             </div>
             
         {% endif %}
@@ -83,13 +96,15 @@
                             <td>Added by:</td>
                             <td>{{listing.creator}}</td>
                         </tr>
-                        <tr>
-                            <td>Category:</td>
-                            <td>{{listing.category}}</td>
-                        </tr>
+                        {% if listing.category%}
+                            <tr>
+                                <td>Category:</td>
+                                <td>{{listing.category}}</td>
+                            </tr>
+                        {% endif %}
                         <tr>
                             <td>Current price:</td>
-                            <td>USD {{listing.bid}}</td>
+                            <td>USD {{listing.current_bid}}</td>
                         </tr>
                     </tbody>
                 </table>

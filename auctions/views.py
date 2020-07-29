@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import User, Listing, Watchlist
+from .models import User, Listing, Watchlist, Bid
 
 def index(request):
     listings = Listing.objects.filter(active=True)
@@ -72,7 +72,7 @@ def create_listing(request):
     else:
         title = request.POST["inputTitle"]
         desc = request.POST["inputDesc"]
-        bid = request.POST["inputBid"]
+        starting_bid = request.POST["inputBid"]
         imageurl = request.POST["inputImageurl"]
         category = request.POST["inputCategory"]
         creator = request.user
@@ -80,10 +80,11 @@ def create_listing(request):
             newListing = Listing(
                 title = title,
                 desc = desc,
-                bid = bid,
+                starting_bid = starting_bid,
                 image = imageurl,
                 category = category,
-                creator = creator
+                creator = creator,
+                current_bid = starting_bid,
             )
             newListing.save()
         except:
@@ -162,16 +163,40 @@ def new_bid(request):
         listing_id = request.POST["listing_id"]
         bid = int(request.POST["bid"])
         listing = Listing.objects.get(id=listing_id, active=True)
-        old_bid = int(listing.bid)
+        if listing.current_bid:
+            old_bid = int(listing.current_bid)
+        else:
+            old_bid = int(listing.starting_bid)
+        
         if request.user != Listing.objects.get(id=listing_id).creator:
-            if bid > old_bid :
-                listing.bid = bid
-                listing.last_bidder = request.user
-                listing.save()
-                HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+            if Listing.objects.get(id=listing_id).last_bidder:
+                if bid > old_bid:
+                    listing.current_bid = bid
+                    listing.last_bidder = request.user
+                    bid_new = Bid(
+                        creator = request.user,
+                        listing = listing,
+                        new_bid = bid
+                    )
+                    listing.save()
+                    bid_new.save()
+                else:
+                    messages.error(request, 'New bid is too low.')
+                    return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
             else:
-                messages.error(request, 'New bid is too low.')
-                return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+                if bid >= old_bid:
+                    listing.current_bid = bid
+                    listing.last_bidder = request.user
+                    bid_new = Bid(
+                        creator = request.user,
+                        listing = listing,
+                        new_bid = bid
+                    )
+                    listing.save()
+                    bid_new.save()
+                else:
+                    messages.error(request, 'New bid is too low.')
+                    return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
         else:
             messages.error(request, 'You are not allowed to make self-bidding.')
             return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
@@ -182,4 +207,41 @@ def new_bid(request):
 
 @login_required(login_url='/login/')
 def close(request):
-    pass
+    if request.method == "POST":
+        listing_id = request.POST["listing_id"]
+        listing = Listing.objects.get(id=listing_id, active=True)
+        if request.user == Listing.objects.get(id=listing_id).creator:
+            listing.active = False
+            wls = Watchlist.objects.filter(listing=listing)
+            listing.save()
+            for i in wls:
+                i.delete()
+        else:
+            messages.error(request, 'You are not authorized to close this listing.')
+            return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+        messages.success(request, 'You close this listing.')
+        return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+    else:
+        return HttpResponseRedirect(reverse("index"))
+
+@login_required(login_url='/login/')
+def won(request):
+    listings = Listing.objects.filter(active=False, last_bidder=request.user)
+    listings = sorted(listings, key=lambda i: i.created_at, reverse=True)
+    return render(request, "auctions/won.html", {
+        "listings": listings,
+    })
+
+def categories(request):
+    listings = Listing.objects.filter(active=True)
+    catgs = [i.category for i in listings if i.category != ""]
+    return render(request, "auctions/categories.html", {
+        "catgs": catgs,
+    })
+
+def category(request, catg):
+    listings = Listing.objects.filter(active=True, category=catg)
+    return render(request, "auctions/category.html", {
+        "listings": listings,
+        "catg": catg,
+    })
