@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import User, Listing, Watchlist, Bid
+from .models import User, Listing, Watchlist, Bid, Comments
 from django.utils import timezone
 
 
@@ -113,6 +113,7 @@ def allWL(request, listing_id, active=True, active2=True):
 
 def listing(request, listing_id):
     wls = allWL(request, listing_id, active="NR")
+    comments = Comments.objects.filter(listing=Listing.objects.get(id=listing_id))
     if len(wls) == 0:
         not_added = True
     else:
@@ -120,6 +121,7 @@ def listing(request, listing_id):
     return render(request, "auctions/listing.html", {
         "listing": Listing.objects.filter(id=listing_id)[0],
         "not_added": not_added,
+        "comments": comments,
     })
 
 @login_required(login_url='/login/')
@@ -261,3 +263,23 @@ def my_listings(request):
     return render(request, "auctions/my_listings.html", {
         "listings": listings,
     })
+
+@login_required(login_url='/login/')
+def add_comment(request):
+    if request.method == "POST":
+        comment = request.POST["comment"]
+        listing_id = request.POST["listing_id"]
+        try:
+            acomment = Comments(
+                acomment = comment,
+                listing = Listing.objects.get(id=listing_id),
+                creator = request.user
+            )
+            acomment.save()
+        except:
+            messages.error(request, 'There is some error.')
+            return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+        messages.success(request, 'You added a comment.')
+        return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+    else:
+        return HttpResponseRedirect(reverse("index"))

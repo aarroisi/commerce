@@ -18,5 +18,6 @@ urlpatterns = [
     path("categories/", views.categories, name="categories"),
     path("categories/<str:catg>/", views.category, name="category"),
     path("my_listings/", views.my_listings, name="my_listings"),
+    path("add_comment/", views.add_comment, name="add_comment"),
 ]
 

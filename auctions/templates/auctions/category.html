@@ -22,7 +22,7 @@
                                 <td>{{listing.created_at}}</td>
                                 <td><img class="img_index" src="{{listing.image}}"></td>
                                 <td><a href="{% url 'listing' listing.id %}">{{listing.title}}</a></td>
-                                <td>{{listing.desc}}</td>
+                                <td>{{listing.desc|truncatechars:80}}</td>
                                 {% load humanize %}
                                 <td>{{listing.current_bid|floatformat:2|intcomma}}</td>
                                 <td>{{listing.creator.username}}</td>

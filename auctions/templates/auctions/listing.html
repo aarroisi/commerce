@@ -137,8 +137,47 @@
                 </div>
             </div>
         </div>
-        <div class="row border border-top-0">
-            for comments
+        <h3>Comments</h3>
+        <div class="row border">
+            <span class="border list_comments border-bottom-0 border-top-0">
+                <table class="table table_comment" style="border-top: 0; margin-bottom: 0;">
+                    <tbody>
+                        {% for comment in comments %}
+                            <tr class="border-bottom">
+                                <td scope="col" style="width: 22%;">
+                                    <small>[{{comment.created_at}}]</small>
+                                </td>
+                                <td scope="col">
+                                    <strong>{{comment.creator.username}}</strong>: {{comment.acomment}}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr class="border-bottom">
+                                <td scope="col" style="width: auto;">
+                                    {% if listing.active %}
+                                        <i>No comment yet.</i>
+                                    {% else %}
+                                        <i>No comment.</i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </span>
+            {% if user.is_authenticated and listing.active %}
+            <span class="border list_comments" style="margin-top: 0;" id="add_comment">
+                <form action="{% url 'add_comment' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group" style="margin: 10px;">
+                        <label for="comments">Add comments: <i>(Signed-in <strong>{{user.username}}</strong>)</i></label>
+                        <input type="hidden" name="listing_id" value="{{listing.id}}">
+                        <textarea class="form-control" id="comments" rows="3" name="comment"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary button_comment">Submit</button>
+                </form> 
+            </span>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

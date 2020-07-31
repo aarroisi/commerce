@@ -37,3 +37,12 @@ class Bid(models.Model):
 
     def __str__(self):
         return f"{self.creator.username} - {self.listing.title} - {self.new_bid}"
+
+class Comments(models.Model):
+    acomment = models.TextField()
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"From {self.creator.username} for {self.listing.title}"

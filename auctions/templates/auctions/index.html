@@ -10,7 +10,7 @@
                         <th scope="col" style="min-width:100px">Created Date</th>
                         <th scope="col" style="min-width:100px">Image</th>
                         <th scope="col" style="min-width:100px">Title</th>
-                        <th scope="col" style="min-width:160px">Description</th>
+                        <th scope="col" style="min-width:200px">Description</th>
                         <th scope="col" style="min-width:100px">Current Bid (USD)</th>
                         <th scope="col" style="min-width:80px">Category</th>
                         <th scope="col" style="min-width:80px">Creator</th>
@@ -23,7 +23,7 @@
                                 <td>{{ listing.created_at }}</td>
                                 <td><img class="img_index" src="{{listing.image}}"></td>
                                 <td><a href="{% url 'listing' listing.id %}">{{listing.title}}</a></td>
-                                <td>{{listing.desc}}</td>
+                                <td>{{listing.desc|truncatechars:80}}</td>
                                 {% load humanize %}
                                 <td>{{listing.current_bid|floatformat:2|intcomma}}</td>
                                 {% if listing.category%}
